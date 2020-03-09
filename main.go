@@ -30,6 +30,9 @@ func main() {
 	group2 := route.Group("/group2", firstMiddleware)
 	group2.GET("first", )
 
+	//post get form
+	route.POST("/post", postParam)
+
 	route.Run(":9205")
 }
 
@@ -66,6 +69,13 @@ func secondMiddleware(c *gin.Context) {
 	log.Println("running AFter  Second   Middleware")
 }
 
-func groupMiddlewareRes(c *gin.Context) {
-	
+func postParam(c *gin.Context) {
+	param := c.PostForm("param1")
+	paramDefault := c.DefaultPostForm("param2", "Default")
+
+	c.JSON(200, gin.H{
+		"Function" : "post",
+		"param1" : param,
+		"paramDefault" : paramDefault,
+	})
 }
