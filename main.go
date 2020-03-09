@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -8,32 +9,63 @@ import (
 
 func main() {
 	route := gin.Default()
-	route.GET("/", WebRoot)
 
-	v1 := route.Group("api/v1")
+	//simple route
+	route.GET("/", webRoot)
+
+	//route with param
+	route.GET("param/:name", paramRoute)
+
+	//route group
+	v1 := route.Group("group")
 	{
-		v1.GET("login", login)
+		v1.GET("/first", firstGroup)
+		v1.GET("/second", secondGroup)
 	}
 
-	route.GET("/user/:name", func(c *gin.Context) {
-		name := c.Param("name")
-		c.String(http.StatusOK, "Hello %s", name)
-	})
+	//route with middleware
+	route.GET("/middle", firstMiddleware, secondMiddleware,handler)
 
-	route.GET("/user/:name/*action", func(c *gin.Context) {
-		name := c.Param("name")
-		action := c.Param("action")
-		message := name + " is " + action
-		c.String(http.StatusOK, message)
-	})
+	//route with group & middleware
+	group2 := route.Group("/group2", firstMiddleware)
+	group2.GET("first", )
 
 	route.Run(":9205")
 }
 
-func WebRoot(context *gin.Context) {
+func webRoot(context *gin.Context) {
 	context.String(http.StatusOK, "hello, world")
 }
 
-func login(context *gin.Context) {
-	context.String(http.StatusOK, "login route")
+func paramRoute(context *gin.Context) {
+	name := context.Param("name")
+	context.String(http.StatusOK, "Input Param : %s", name)
+}
+
+func firstGroup(context *gin.Context) {
+	context.String(http.StatusOK, "You Got First Group Route")
+}
+
+func secondGroup(context *gin.Context) {
+	context.String(http.StatusOK, "You Got Second Group Route")
+}
+
+func handler(c *gin.Context) {
+	log.Println("running At Handler")
+}
+
+func firstMiddleware(c *gin.Context) {
+	log.Println("running At   First   Middleware")
+	c.Next()
+	log.Println("running AFter First   Middleware")
+}
+
+func secondMiddleware(c *gin.Context) {
+	log.Println("running At  Second   Middleware")
+	c.Next()
+	log.Println("running AFter  Second   Middleware")
+}
+
+func groupMiddlewareRes(c *gin.Context) {
+	
 }
